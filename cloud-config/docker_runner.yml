@@ -1,0 +1,20 @@
+#cloud-config
+runcmd:
+  - echo 'CI_MASTER_SSHKEY' >> /root/.ssh/authorized_keys
+  - curl -L https://get.docker.com | bash
+  - curl -L https://packages.gitlab.com/install/repositories/runner/gitlab-runner/script.deb.sh | bash
+  - apt-get install -y gitlab-runner
+  - export CI_SERVER_URL='CI_REGISTRATION_URL'
+  - export REGISTRATION_TOKEN=CI_REGISTRATION_TOKEN
+  - export REGISTER_NON_INTERACTIVE=true
+  - export RUNNER_EXECUTOR=docker
+  - export RUNNER_TAG_LIST=docker
+  - export RUNNER_ENV='DOCKER_TLS_CERTDIR='
+  - export REGISTER_LOCKED=false
+  - export REGISTER_RUN_UNTAGGED=true
+  - export DOCKER_IMAGE='docker:latest'
+  - export DOCKER_CPUS=2
+  - export DOCKER_PRIVILEGED=true
+  - systemctl -q is-active docker && export DOCKER=1 || systemctl restart docker
+  - systemctl -q is-active docker && export DOCKER=1
+  - if test ${DOCKER} = 1; then gitlab-runner register; fi

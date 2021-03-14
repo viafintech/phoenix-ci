@@ -1,0 +1,24 @@
+---
+test:
+  only:
+    variables:
+      - $CI_RUN != "1"
+  script:
+    - echo "Here we can run some actual CI tests..."
+
+scale:
+  only:
+    variables:
+      - $CI_RUN == "1"
+  before_script:
+    - echo "Preparing the cloud-init config files for runner scaling"
+    - sed -i "s,CI_MASTER_SSHKEY,${CI_MASTER_SSHKEY},g" cloud-config/*.yml
+    - sed -i "s,CI_REGISTRATION_URL,${CI_REGISTRATION_URL},g" cloud-config/*.yml
+    - sed -i "s,CI_REGISTRATION_TOKEN,${CI_REGISTRATION_TOKEN},g" cloud-config/*.yml
+    - echo "Initialize Python virtual environment"
+    - virtualenv -q -p python3 .venv
+    - source .venv/bin/activate
+    - echo "Installing Python modules"
+    - pip -q install -r requirements.txt
+  script:
+    - python phoenix_ci.py -t ${HCLOUD_TOKEN} -d ${CI_DOCKER_RUNNER} -s ${CI_SHELL_RUNNER} --servertype=${CI_SERVER_TYPE} --docker-userdata=cloud-config/docker_runner.yml --shell-userdata=cloud-config/shell_runner.yml

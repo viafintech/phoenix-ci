@@ -1,0 +1,24 @@
+#cloud-config
+runcmd:
+  - echo 'CI_MASTER_SSHKEY' >> /root/.ssh/authorized_keys
+  - curl -L https://get.docker.com | bash
+  - curl -L "https://github.com/docker/compose/releases/download/1.24.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+  - chmod +x /usr/local/bin/docker-compose
+  - echo "deb http://ppa.launchpad.net/ansible/ansible/ubuntu trusty main" > /etc/apt/sources.list.d/ansible_ubuntu.list
+  - apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 93C4A3FD7BB9C367
+  - curl -L https://packages.gitlab.com/install/repositories/runner/gitlab-runner/script.deb.sh | bash
+  - apt-get update && apt-get -y install unzip python-bashate python3-bashate shellcheck gitlab-runner ansible
+  - wget https://releases.hashicorp.com/packer/1.7.0/packer_1.7.0_linux_amd64.zip -O /tmp/packer.zip
+  - unzip /tmp/packer.zip -d /usr/local/bin/
+  - usermod -a -G docker gitlab-runner
+  - export CI_SERVER_URL='CI_REGISTRATION_URL'
+  - export REGISTRATION_TOKEN=CI_REGISTRATION_TOKEN
+  - export REGISTER_NON_INTERACTIVE=true
+  - export RUNNER_EXECUTOR=shell
+  - export RUNNER_TAG_LIST=shell
+  - export RUNNER_ENV='DOCKER_TLS_CERTDIR='
+  - export REGISTER_LOCKED=false
+  - systemctl -q is-active docker && export DOCKER=1 || systemctl restart docker
+  - systemctl -q is-active docker && export DOCKER=1
+  - if test ${DOCKER} = 1; then gitlab-runner register; fi
+  - rm /home/gitlab-runner/.bash_logout # fixes gitlab-runner issue id 4449
