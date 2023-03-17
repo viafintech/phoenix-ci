@@ -3,6 +3,7 @@ runcmd:
   - echo 'CI_MASTER_SSHKEY' >> /root/.ssh/authorized_keys
   - curl -L https://get.docker.com | bash
   - curl -L https://packages.gitlab.com/install/repositories/runner/gitlab-runner/script.deb.sh | bash
+  - apt-get install -y apparmor
   - apt-get install -y gitlab-runner
   - export CI_SERVER_URL='CI_REGISTRATION_URL'
   - export REGISTRATION_TOKEN=CI_REGISTRATION_TOKEN
