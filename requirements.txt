@@ -2,7 +2,7 @@ certifi==2023.7.22
 chardet==4.0.0
 future==0.18.3
 hcloud==1.11.0
-idna==2.10
+idna==3.7
 python-dateutil==2.8.1
 requests==2.31.0
 six==1.15.0
